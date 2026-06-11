@@ -1,0 +1,8 @@
+{
+  "image": "tests/fixtures/parity_image.png",
+  "categories": ["cat", "remote"],
+  "prompt_template": "Locate all the instances that matches the following description: {cats}.",
+  "category_sep": "</c>",
+  "max_new_tokens": 256,
+  "generation_mode": "hybrid"
+}

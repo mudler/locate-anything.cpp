@@ -1,0 +1,62 @@
+[
+  {
+    "dtype": "f32",
+    "size_gb": 15.33,
+    "infer_s": 14.49,
+    "load_s": 4.1,
+    "n_boxes": 4,
+    "match_vs_f32": "4/4",
+    "min_iou": 1.0,
+    "max_coord_px": 0.0
+  },
+  {
+    "dtype": "f16",
+    "size_gb": 9.15,
+    "infer_s": 13.68,
+    "load_s": 2.51,
+    "n_boxes": 4,
+    "match_vs_f32": "4/4",
+    "min_iou": 1.0,
+    "max_coord_px": 0.0
+  },
+  {
+    "dtype": "q8_0",
+    "size_gb": 6.26,
+    "infer_s": 6.07,
+    "load_s": 2.2,
+    "n_boxes": 4,
+    "match_vs_f32": "4/4",
+    "min_iou": 1.0,
+    "max_coord_px": 0.0
+  },
+  {
+    "dtype": "q6_k",
+    "size_gb": 5.51,
+    "infer_s": 5.77,
+    "load_s": 1.44,
+    "n_boxes": 4,
+    "match_vs_f32": "4/4",
+    "min_iou": 1.0,
+    "max_coord_px": 0.0
+  },
+  {
+    "dtype": "q5_k",
+    "size_gb": 5.1,
+    "infer_s": 5.11,
+    "load_s": 1.89,
+    "n_boxes": 4,
+    "match_vs_f32": "4/4",
+    "min_iou": 0.982,
+    "max_coord_px": 0.45
+  },
+  {
+    "dtype": "q4_k",
+    "size_gb": 4.72,
+    "infer_s": 4.29,
+    "load_s": 1.73,
+    "n_boxes": 4,
+    "match_vs_f32": "4/4",
+    "min_iou": 0.982,
+    "max_coord_px": 0.45
+  }
+]

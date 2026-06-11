@@ -1,0 +1,99 @@
+{
+  "host": {
+    "cpu": "x86_64",
+    "threads": 16
+  },
+  "speed": [
+    {
+      "image": "parity_image.png",
+      "mode": "slow",
+      "n_up": 4,
+      "n_cpp": 4,
+      "matched": 4,
+      "min_iou": 1.0,
+      "upstream_s": 23.65,
+      "cpp_infer_s": 14.26,
+      "cpp_total_s": 18.93,
+      "speedup": 1.66
+    },
+    {
+      "image": "parity_image.png",
+      "mode": "hybrid",
+      "n_up": 42,
+      "n_cpp": 42,
+      "matched": 42,
+      "min_iou": 0.999,
+      "upstream_s": 69.06,
+      "cpp_infer_s": 22.32,
+      "cpp_total_s": 26.99,
+      "speedup": 3.09
+    },
+    {
+      "image": "parity_image.png",
+      "mode": "fast",
+      "n_up": 42,
+      "n_cpp": 42,
+      "matched": 42,
+      "min_iou": 1.0,
+      "upstream_s": 57.55,
+      "cpp_infer_s": 19.45,
+      "cpp_total_s": 24.12,
+      "speedup": 2.96
+    }
+  ],
+  "quant": [
+    {
+      "quant": "f32",
+      "size_gb": 15.33,
+      "cpp_infer_s": 13.56,
+      "matched": 4,
+      "n_up": 4,
+      "min_iou": 1.0,
+      "max_coord_px": 0.0
+    },
+    {
+      "quant": "q8_0",
+      "size_gb": 6.26,
+      "cpp_infer_s": 4.89,
+      "matched": 4,
+      "n_up": 4,
+      "min_iou": 1.0,
+      "max_coord_px": 0.0
+    },
+    {
+      "quant": "q4_k",
+      "size_gb": 4.72,
+      "cpp_infer_s": 4.36,
+      "matched": 4,
+      "n_up": 4,
+      "min_iou": 0.982,
+      "max_coord_px": 0.5
+    }
+  ],
+  "demo": [
+    {
+      "image": "coco_street.jpg",
+      "prompt": "person</c>car",
+      "n_boxes": 4,
+      "annotated": "demo_coco_street.png"
+    },
+    {
+      "image": "coco_kitchen.jpg",
+      "prompt": "bottle</c>bowl",
+      "n_boxes": 7,
+      "annotated": "demo_coco_kitchen.png"
+    },
+    {
+      "image": "coco_living_room.jpg",
+      "prompt": "chair</c>couch",
+      "n_boxes": 5,
+      "annotated": "demo_coco_living_room.png"
+    },
+    {
+      "image": "bus.jpg",
+      "prompt": "person</c>bus",
+      "n_boxes": 5,
+      "annotated": "demo_bus.png"
+    }
+  ]
+}

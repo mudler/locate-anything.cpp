@@ -1,0 +1,14 @@
+torch>=2.2
+transformers>=4.51,<4.52
+safetensors>=0.4.3
+huggingface_hub>=0.24
+gguf>=0.10
+numpy>=1.26
+Pillow>=10.0
+pytest>=8.0
+einops>=0.7
+peft>=0.10
+torchvision
+opencv-python-headless
+lmdb
+decord

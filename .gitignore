@@ -1,0 +1,14 @@
+/build/
+/build-*/
+.venv/
+__pycache__/
+*.pyc
+/models/
+/dumps/
+*.gguf
+*.safetensors
+!tests/fixtures/**
+# benchmark/demo intermediates (the recorder writes root-owned files here; the
+# published clips live in benchmarks/media/)
+/benchmarks/demo/out/
+/benchmarks/media/_tmp.json
