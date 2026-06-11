@@ -71,7 +71,7 @@ std::vector<Box> Engine::locate_image(const Image& img, const std::string& query
     if(mode==Mode::Slow) ok = lm.decode_greedy_resident(prompt_ids, projected, max_new, gen_ids);
     else                 ok = lm.decode_hybrid(prompt_ids, projected, max_new, gen_ids,
                                                nullptr, /*fast=*/mode==Mode::Fast,
-                                               /*early_stop=*/true);
+                                               /*early_stop=*/!std::getenv("LA_NO_EARLYSTOP"));
     if(!ok) return empty;
 
     // 6) parse boxes. Coords denormalize against the preprocessed target size

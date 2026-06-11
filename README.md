@@ -2,14 +2,15 @@
 
 **Brought to you by the [LocalAI](https://github.com/mudler/LocalAI) team**, the folks behind LocalAI, the open-source AI engine that runs any model (LLMs, vision, voice, image, video) on any hardware, no GPU required.
 
+[![Model on Hugging Face](https://huggingface.co/datasets/huggingface/badges/resolve/main/model-on-hf-md.svg)](https://huggingface.co/mudler/locate-anything.cpp-gguf)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![LocalAI](https://img.shields.io/badge/LocalAI-Run_Locally-orange)](https://github.com/mudler/LocalAI)
 
-locate-anything.cpp is a C++17 inference port of NVIDIA's [`LocateAnything-3B`](https://huggingface.co/nvidia/LocateAnything-3B) — an open-vocabulary detection / visual-grounding VLM — built on [ggml](https://github.com/ggml-org/ggml). It gives you fast, dependency-light object detection from a text prompt on CPU (and on GPU through ggml's backends), with no Python runtime at inference time.
+locate-anything.cpp is a C++17 inference port of NVIDIA's [`LocateAnything-3B`](https://huggingface.co/nvidia/LocateAnything-3B) - an open-vocabulary detection / visual-grounding VLM - built on [ggml](https://github.com/ggml-org/ggml). It gives you fast, dependency-light object detection from a text prompt on CPU (and on GPU through ggml's backends), with no Python runtime at inference time.
 
-The model is Qwen2.5-3B (LM) + MoonViT (vision) + a 2-layer MLP projector; detection happens in *token space* — the model emits coordinate tokens `<0>`..`<1000>` that decode to boxes. The full pixel→labeled-boxes pipeline is ported and **validated against the official implementation**: the boxes come out identical, just faster (details and methodology in [`benchmarks/BENCHMARK.md`](benchmarks/BENCHMARK.md)).
+The model is Qwen2.5-3B (LM) + MoonViT (vision) + a 2-layer MLP projector; detection happens in *token space* - the model emits coordinate tokens `<0>`..`<1000>` that decode to boxes. The full pixel→labeled-boxes pipeline is ported and **validated against the official implementation**: the boxes come out identical, just faster (details and methodology in [`benchmarks/BENCHMARK.md`](benchmarks/BENCHMARK.md)).
 
-Same detections as the official `LocateAnything-3B`, faster — here on an NVIDIA GB10 GPU,
+Same detections as the official `LocateAnything-3B`, faster - here on an NVIDIA GB10 GPU,
 against the official model run exactly as its model card documents (bf16), across three
 scenes:
 
@@ -17,7 +18,7 @@ scenes:
   <img src="benchmarks/media/race_gpu.gif" width="88%" alt="GPU: locate-anything.cpp vs official PyTorch (bf16), ~2x faster across three scenes">
 </p>
 
-<sub>It also runs on CPU with no GPU at all (~1.7–3× over PyTorch-CPU; see <a href="benchmarks/BENCHMARK.md">benchmarks</a>).</sub>
+<sub>It also runs on CPU with no GPU at all (~1.7-3× over PyTorch-CPU; see <a href="benchmarks/BENCHMARK.md">benchmarks</a>).</sub>
 
 ## What it does
 
@@ -51,9 +52,9 @@ On a Ryzen 9 9950X3D (CPU, 16 threads), inference-only on the 448 fixture:
   <img src="benchmarks/plots/quant_tradeoff.png" width="48%" alt="quantization size/speed tradeoff">
 </p>
 
-Quantized (LM matmuls only; ViT/projector/norms stay f32) it gets smaller **and** faster with the same boxes — `q8_0` (6.3 GB) runs slow-mode in **4.89 s**, about **4.8× faster than the official f32 model**, byte-identical detections.
+Quantized (LM matmuls only; ViT/projector/norms stay f32) it gets smaller **and** faster with the same boxes - `q8_0` (6.3 GB) runs slow-mode in **4.89 s**, about **4.8× faster than the official f32 model**, byte-identical detections.
 
-On **GPU** (build with `-DLA_GGML_CUDA=ON`; auto-selects the device, `LA_DEVICE=` for GPU / `LA_DEVICE=cpu` to force CPU) the weights move to VRAM. Run against the official model exactly as its model card documents (**bf16**), greedily, on one NVIDIA GB10: precision-matched (our **f16** vs its bf16) **ours is ~1.7× faster**, and the recommended **q8_0** build (box-identical) is **~1.9–2.1×**. Vs the official *sampled* out-of-box run it's mixed (faster on sparse scenes, comparable on dense — sampling stops earlier there). Full tables, the f16/q8/greedy/sampling breakdown, quantization, and parity methodology are in [`benchmarks/BENCHMARK.md`](benchmarks/BENCHMARK.md).
+On **GPU** (build with `-DLA_GGML_CUDA=ON`; auto-selects the device, `LA_DEVICE=` for GPU / `LA_DEVICE=cpu` to force CPU) the weights move to VRAM. Run against the official model exactly as its model card documents (**bf16**), greedily, on one NVIDIA GB10: precision-matched (our **f16** vs its bf16) **ours is ~1.7× faster**, and the recommended **q8_0** build (box-identical) is **~1.9-2.1×**. Vs the official *sampled* out-of-box run it's mixed (faster on sparse scenes, comparable on dense - sampling stops earlier there). Full tables, the f16/q8/greedy/sampling breakdown, quantization, and parity methodology are in [`benchmarks/BENCHMARK.md`](benchmarks/BENCHMARK.md).
 
 ## Build
 
@@ -75,6 +76,24 @@ cmake -B build -DLA_BUILD_TESTS=ON -DLA_BUILD_CLI=ON && cmake --build build -j
 | `LA_GGML_CUDA`   | OFF | Forward `GGML_CUDA` to the submodule |
 | `LA_GGML_METAL`  | OFF | Forward `GGML_METAL` to the submodule |
 | `LA_GGML_VULKAN` | OFF | Forward `GGML_VULKAN` to the submodule |
+
+## Models
+
+Prebuilt GGUFs are published on Hugging Face at
+[`mudler/locate-anything.cpp-gguf`](https://huggingface.co/mudler/locate-anything.cpp-gguf)
+(all derived from [`nvidia/LocateAnything-3B`](https://huggingface.co/nvidia/LocateAnything-3B);
+only the Qwen2 LM matmuls are quantized, the vision tower + projector stay f32):
+
+| File | Bits (LM) | Size | Notes |
+| ---- | --------- | ---- | ----- |
+| [`locate-anything-f16.gguf`](https://huggingface.co/mudler/locate-anything.cpp-gguf/blob/main/locate-anything-f16.gguf)  | f16  | ~9.2 GB | LM matmuls in f16, everything else f32 |
+| [`locate-anything-q8_0.gguf`](https://huggingface.co/mudler/locate-anything.cpp-gguf/blob/main/locate-anything-q8_0.gguf) | q8_0 | ~6.3 GB | near-lossless, **box-identical** to f32 - **recommended** |
+| [`locate-anything-q6_k.gguf`](https://huggingface.co/mudler/locate-anything.cpp-gguf/blob/main/locate-anything-q6_k.gguf) | q6_k | ~5.5 GB | box-identical to f32 |
+| [`locate-anything-q5_k.gguf`](https://huggingface.co/mudler/locate-anything.cpp-gguf/blob/main/locate-anything-q5_k.gguf) | q5_k | ~5.1 GB | sub-pixel box drift |
+| [`locate-anything-q4_k.gguf`](https://huggingface.co/mudler/locate-anything.cpp-gguf/blob/main/locate-anything-q4_k.gguf) | q4_k | ~4.7 GB | smallest, sub-pixel box drift |
+
+The full-precision f32 GGUF (~15 GB) is reproducible from the HF weights with the converter
+below. Quantization tradeoffs are in [`benchmarks/BENCHMARK.md`](benchmarks/BENCHMARK.md).
 
 ## Get the model
 
@@ -114,7 +133,7 @@ The prompt is open-vocabulary; separate multiple categories with `</c>`.
 The C++ `la::Engine` (`src/engine.hpp`) and a flat C ABI (`include/la_capi.h`:
 `la_capi_load` / `la_capi_locate_path` / detection accessors / `la_capi_last_error` / ...)
 are both built into `liblocate_anything`. Build it as a self-contained shared library
-(ggml static-linked in, no external `libggml`) with `-DLA_SHARED=ON` — the loadable form
+(ggml static-linked in, no external `libggml`) with `-DLA_SHARED=ON` - the loadable form
 for a LocalAI backend or any `dlopen` consumer.
 
 ## Verification
