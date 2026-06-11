@@ -309,8 +309,6 @@ bool LMForward::decode_hybrid(const std::vector<int32_t>& prompt_ids,
                               std::vector<std::vector<float>>* captured_logits6,
                               bool fast, bool early_stop){
     const int TEXT_MASK = 151676;     // default_mask_token_id
-    const int BOX_START = 151668, BOX_END = 151669;       // degenerate-tail early-stop
-    const int COORD_START = 151677, COORD_END = 152677;
     const int block = 6;
     const auto& c = ml_.config();
     const int prompt_len = (int)prompt_ids.size();
@@ -352,6 +350,18 @@ bool LMForward::decode_hybrid(const std::vector<int32_t>& prompt_ids,
             const int v = (int)logits6.size()/block;
             std::vector<std::vector<float>> l6(block, std::vector<float>(v));
             for(int p=0;p<block;++p) for(int t=0;t<v;++t) l6[p][t]=logits6[(size_t)p*v+t];
+            // Principled early-stop: greedy hybrid keeps fabricating boxes past the real
+            // detections (decode_bbox_avg never checks position 0). But the model's own
+            // greedy choice for the next box-frame start IS im_end / null once it's done
+            // — e.g. on the fixture p(im_end)=0.9996 right after the 4th box. That's the
+            // exact signal the official *sampling* config stops on (it draws im_end there).
+            // So stop when argmax(block position 0) is im_end/null. (early_stop=false for
+            // the parity gates, which still reproduce the full reference stream.)
+            const int IM_END = 151645, NULL_TOK = 152678;
+            if(early_stop){
+                int a0 = argmax(l6[0]);
+                if(a0 == IM_END || a0 == NULL_TOK){ st.terminated = true; break; }
+            }
             std::vector<int32_t> new_tokens = mtp::select_new_tokens(l6, 4, fast);
             mtp::StepOut step = mtp::hybrid_mtp_step(st, new_tokens, fast);
             for(int t: step.committed) generated.push_back(t);
@@ -369,29 +379,6 @@ bool LMForward::decode_hybrid(const std::vector<int32_t>& prompt_ids,
             cached_len += n_recompute;  // == chunk we just cached; keeps kv.past_len in sync
         }
         if(st.terminated) break;
-        // Early-stop the degenerate box tail (greedy hybrid never emits im_end, so it runs
-        // to the cap emitting boxes that repeat or "march" with a fixed x-span). Works at
-        // the box level over the whole stream, so it catches boxes from both the MTP and AR
-        // paths: if the last completed box shares BOTH x-edge coord tokens (c0=x1, c2=x2)
-        // with the previous box, two distinct objects wouldn't — drop it and stop.
-        if(early_stop){
-            int s0=0,s1=0,c0a=-1,c2a=-1,c0b=-1,c2b=-1;  // last/prev box: start idx + x-edges
-            for(int i=prompt_len;i<(int)generated.size();){
-                if(generated[i]==BOX_START){
-                    int j=i+1; std::vector<int> cc;
-                    while(j<(int)generated.size() && generated[j]!=BOX_END){
-                        if(generated[j]>=COORD_START && generated[j]<=COORD_END) cc.push_back(generated[j]);
-                        ++j;
-                    }
-                    if(cc.size()==4){ s1=s0; c0b=c0a; c2b=c2a; s0=i; c0a=cc[0]; c2a=cc[2]; }
-                    i=j+1;
-                } else ++i;
-            }
-            if(c0b>=0 && c0a==c0b && c2a==c2b){      // last box duplicates prev x-edges
-                generated.resize(s0);                 // drop the degenerate box, stop
-                break;
-            }
-        }
     }
     out_ids.assign(generated.begin()+prompt_len, generated.end());
     kv.free();
