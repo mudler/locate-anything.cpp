@@ -59,29 +59,20 @@
         742.98,
         85.176
       ]
-    ],
-    [
-      "person",
-      [
-        802.256,
-        0.0,
-        812.0,
-        85.176
-      ]
     ]
   ],
   "engines": [
     {
       "label": "locate-anything.cpp (q8)",
       "device": "GB10 GPU",
-      "proc_s": 2.556,
-      "rate": "7 boxes",
+      "proc_s": 2.489,
+      "rate": "6 boxes",
       "accent": "teal"
     },
     {
       "label": "PyTorch (official, bf16)",
       "device": "GB10 GPU",
-      "proc_s": 4.784,
+      "proc_s": 4.815,
       "rate": "greedy",
       "accent": "slate"
     }

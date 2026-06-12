@@ -54,7 +54,7 @@ On a Ryzen 9 9950X3D (CPU, 16 threads), inference-only on the 448 fixture:
 
 Quantized (LM matmuls only; ViT/projector/norms stay f32) it gets smaller **and** faster with the same boxes - `q8_0` (6.3 GB) runs slow-mode in **4.89 s**, about **4.8× faster than the official f32 model**, byte-identical detections.
 
-On **GPU** (build with `-DLA_GGML_CUDA=ON`; auto-selects the device, `LA_DEVICE=` for GPU / `LA_DEVICE=cpu` to force CPU) the weights move to VRAM. Run against the official model exactly as its model card documents (**bf16**), greedily, on one NVIDIA GB10: precision-matched (our **f16** vs its bf16) **ours is ~1.7× faster**, and the recommended **q8_0** build (box-identical) is **~1.9-2.1×**. Vs the official *sampled* out-of-box run it's mixed (faster on sparse scenes, comparable on dense - sampling stops earlier there). Full tables, the f16/q8/greedy/sampling breakdown, quantization, and parity methodology are in [`benchmarks/BENCHMARK.md`](benchmarks/BENCHMARK.md).
+On **GPU** (build with `-DLA_GGML_CUDA=ON`; auto-selects the device, `LA_DEVICE=` for GPU / `LA_DEVICE=cpu` to force CPU) the weights move to VRAM. Run against the official model exactly as its model card documents (**bf16**), greedily, on one NVIDIA GB10: precision-matched (our **f16** vs its bf16) **ours is ~1.7-2.1× faster**, and the recommended **q8_0** build (box-identical) is **~1.9-3.1×**. Vs the official *sampled* out-of-box run it's mixed (faster on sparse scenes, comparable on dense - sampling stops earlier there). Full tables, the f16/q8/greedy/sampling breakdown, quantization, and parity methodology are in [`benchmarks/BENCHMARK.md`](benchmarks/BENCHMARK.md).
 
 ## Build
 

@@ -379,6 +379,45 @@ bool LMForward::decode_hybrid(const std::vector<int32_t>& prompt_ids,
             cached_len += n_recompute;  // == chunk we just cached; keeps kv.past_len in sync
         }
         if(st.terminated) break;
+        // Robust loop-stop, complementing the im_end argmax check above. On some
+        // images the model never emits im_end but instead LOOPS, re-emitting one
+        // identical box forever (e.g. the bus scene: [802,376,812,410] x39). The
+        // im_end signal stays low there. Detect the loop directly: if the last
+        // completed box has all four coordinate tokens identical to the previous
+        // box, drop the duplicate and stop. Two distinct objects never share a
+        // pixel-identical box, so we keep the first occurrence and never drop a
+        // real detection. (early_stop=false, the parity path, keeps the full stream.)
+        if(early_stop){
+            const int BOX_START=151668, BOX_END=151669, COORD_START=151677, COORD_END=152677;
+            int pc[4]={-2,-2,-2,-2}, lc[4]={-1,-1,-1,-1}, pn=0, ln=0, lstart=-1;
+            for(int i=prompt_len;i<(int)generated.size();){
+                if(generated[i]==BOX_START){
+                    int j=i+1, cc[4]={0,0,0,0}, n=0;
+                    while(j<(int)generated.size() && generated[j]!=BOX_END){
+                        if(generated[j]>=COORD_START && generated[j]<=COORD_END && n<4) cc[n++]=generated[j];
+                        ++j;
+                    }
+                    if(n==4){ for(int k=0;k<4;++k){ pc[k]=lc[k]; lc[k]=cc[k]; } pn=ln; ln=4; lstart=i; }
+                    i=j+1;
+                } else ++i;
+            }
+            if(pn==4 && ln==4){
+                // The degenerate tail loops in a few shapes: an exact repeat (bus:
+                // [802,376,812,410] x39), or a "march" along one axis - one pair of
+                // edges held fixed while the box slides and shrinks into slivers
+                // (kitchen: y1=175,y2=210 fixed, x marching, width 38->5). Detect a
+                // repeat, or a both-x / both-y edge match where the new box is a
+                // sliver. The sliver guard (a real aligned object is not tiny) keeps
+                // this from dropping genuine objects that merely share a shelf line.
+                bool dup   = (lc[0]==pc[0] && lc[1]==pc[1] && lc[2]==pc[2] && lc[3]==pc[3]);
+                bool xedge = (lc[0]==pc[0] && lc[2]==pc[2]);          // both left+right edges
+                bool yedge = (lc[1]==pc[1] && lc[3]==pc[3]);          // both top+bottom edges
+                bool sliver = (lc[2]-lc[0] < 20) || (lc[3]-lc[1] < 20);  // tiny in 0..1000 space
+                if(dup || ((xedge || yedge) && sliver)){
+                    generated.resize(lstart); st.terminated=true; break;
+                }
+            }
+        }
     }
     out_ids.assign(generated.begin()+prompt_len, generated.end());
     kv.free();

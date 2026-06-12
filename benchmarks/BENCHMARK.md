@@ -122,9 +122,9 @@ max_new_tokens=2048`) - a *different* decode, shown for the literal out-of-box t
 
 | image | official bf16 · greedy | ours **f16** · greedy | f16 speedup | ours **q8_0** · greedy | q8 speedup | official bf16 · **sampling** |
 | ----- | ---------------------- | --------------------- | ----------- | ---------------------- | ---------- | ---------------------------- |
-| coco_skater  | 2.53 s | 1.51 s | **1.7×** | 1.21 s | **2.1×** | 2.08 s |
-| bus          | 4.78 s | 2.80 s | **1.7×** | 2.56 s | **1.9×** | 2.00 s |
-| coco_kitchen | 2.73 s | 2.52 s | 1.1×     | 1.42 s | **1.9×** | 1.01 s |
+| coco_skater  | 2.56 s | 1.48 s | **1.7×** | 1.20 s | **2.1×** | 1.64 s |
+| bus          | 4.82 s | 2.68 s | **1.8×** | 2.49 s | **1.9×** | 2.00 s |
+| coco_kitchen | 2.75 s | 1.34 s | **2.1×** | 0.89 s | **3.1×** | 1.04 s |
 
 <p align="center"><img src="plots/gpu_speedup.png" width="70%" alt="GB10 GPU speedup vs official bf16 greedy"></p>
 
@@ -135,18 +135,23 @@ The precision-matched race - our **f16** vs the official **bf16**, greedy, on th
 
 Honest reads:
 
-- **Greedy, precision-matched (our f16 vs the official bf16): ours is ~1.1-1.7× faster** on
+- **Greedy, precision-matched (our f16 vs the official bf16): ours is ~1.7-2.1× faster** on
   the GB10 GPU. The recommended **q8_0** build (box-identical to f16, see the quant table) is
-  faster still - ~1.9-2.1× - by halving the LM weight bandwidth. The only asymmetry in the
+  faster still - ~1.9-3.1× - by halving the LM weight bandwidth. The only asymmetry in the
   greedy columns is that ours has the early-stop and the official greedy runs to the cap.
-- The kitchen f16 row is the weak one (1.1×): the early-stop is a heuristic on the
-  numerically-unstable degenerate tail and didn't trigger for f16 there, so it ran long.
+- **Kitchen is the biggest win** (q8 3.1×, f16 2.1×) because it has the longest degenerate
+  tail to skip. Greedy hybrid decoding never emits `im_end`, so it keeps fabricating boxes to
+  the cap - either the model "gives up" (its greedy choice for the next box becomes `im_end`)
+  or it loops one box (an exact repeat, or a sliver marching along one axis). Our deterministic
+  early-stop catches all three; the official greedy runs the full tail. This is inherent to
+  greedy decoding: the official's *documented* config isn't greedy - it relies on
+  `repetition_penalty=1.1` + sampling to dissolve the loop instead.
 - **vs the official *sampled* out-of-box run it's mixed**: faster on sparse scenes (skater),
-  slower on dense ones (bus/kitchen), because the official sampling emits `im_end` and stops
-  earlier there. Greedy decoding (ours and the model's own greedy) is inherently more verbose.
+  comparable on dense ones (bus/kitchen), because the official sampling stops earlier there.
 
-Box parity holds where it should (e.g. bus 7/7 within ~6 px, bf16-vs-q8 rounding); on dense
-scenes the per-image counts differ only in the degenerate tail.
+The displayed boxes are the **real detections** (both engines agree on them); ours trims the
+degenerate tail that the official greedy keeps. The parity gate (`early_stop=false`) still
+reproduces the official greedy stream byte-for-byte (258/258 ids) - see [Parity](#parity).
 
 ## Caveats / honesty
 

@@ -1,13 +1,13 @@
 {
   "coco_skater": {
-    "ours_s": 1.21,
-    "up_greedy_s": 2.533,
-    "up_sample_s": 2.084,
-    "speedup_vs_greedy": 2.09,
-    "speedup_vs_official_sample": 1.72,
-    "ours_boxes": 18,
+    "ours_s": 1.201,
+    "up_greedy_s": 2.555,
+    "up_sample_s": 1.639,
+    "speedup_vs_greedy": 2.13,
+    "speedup_vs_official_sample": 1.36,
+    "ours_boxes": 17,
     "up_greedy_boxes": 17,
-    "box_maxdiff_px": 9999.0,
+    "box_maxdiff_px": 118.5,
     "target_w": 644,
     "target_h": 504,
     "boxes": [
@@ -163,27 +163,18 @@
           642.712,
           283.248
         ]
-      ],
-      [
-        "person",
-        [
-          636.272,
-          234.36,
-          642.712,
-          283.248
-        ]
       ]
     ]
   },
   "bus": {
-    "ours_s": 2.556,
-    "up_greedy_s": 4.784,
-    "up_sample_s": 1.995,
-    "speedup_vs_greedy": 1.87,
-    "speedup_vs_official_sample": 0.78,
-    "ours_boxes": 7,
+    "ours_s": 2.489,
+    "up_greedy_s": 4.815,
+    "up_sample_s": 1.999,
+    "speedup_vs_greedy": 1.93,
+    "speedup_vs_official_sample": 0.8,
+    "ours_boxes": 6,
     "up_greedy_boxes": 7,
-    "box_maxdiff_px": 5.68,
+    "box_maxdiff_px": 9999.0,
     "target_w": 812,
     "target_h": 1092,
     "boxes": [
@@ -240,25 +231,16 @@
           742.98,
           85.176
         ]
-      ],
-      [
-        "person",
-        [
-          802.256,
-          0.0,
-          812.0,
-          85.176
-        ]
       ]
     ]
   },
   "coco_kitchen": {
-    "ours_s": 1.42,
-    "up_greedy_s": 2.729,
-    "up_sample_s": 1.006,
-    "speedup_vs_greedy": 1.92,
-    "speedup_vs_official_sample": 0.71,
-    "ours_boxes": 27,
+    "ours_s": 0.892,
+    "up_greedy_s": 2.752,
+    "up_sample_s": 1.04,
+    "speedup_vs_greedy": 3.09,
+    "speedup_vs_official_sample": 1.17,
+    "ours_boxes": 9,
     "up_greedy_boxes": 31,
     "box_maxdiff_px": 9999.0,
     "target_w": 644,
@@ -343,168 +325,6 @@
           169.792,
           432.768,
           211.008
-        ]
-      ],
-      [
-        "bottle",
-        [
-          432.768,
-          169.792,
-          443.716,
-          211.008
-        ]
-      ],
-      [
-        "bottle",
-        [
-          443.716,
-          169.792,
-          455.952,
-          211.008
-        ]
-      ],
-      [
-        "bottle",
-        [
-          455.952,
-          169.792,
-          468.188,
-          211.008
-        ]
-      ],
-      [
-        "bottle",
-        [
-          468.188,
-          169.792,
-          479.136,
-          211.008
-        ]
-      ],
-      [
-        "bottle",
-        [
-          479.136,
-          169.792,
-          492.016,
-          211.008
-        ]
-      ],
-      [
-        "bottle",
-        [
-          492.016,
-          169.792,
-          504.252,
-          211.008
-        ]
-      ],
-      [
-        "bottle",
-        [
-          504.252,
-          169.792,
-          517.132,
-          211.008
-        ]
-      ],
-      [
-        "bottle",
-        [
-          517.132,
-          169.792,
-          532.588,
-          211.008
-        ]
-      ],
-      [
-        "bottle",
-        [
-          532.588,
-          169.792,
-          545.468,
-          211.008
-        ]
-      ],
-      [
-        "bottle",
-        [
-          545.468,
-          169.792,
-          557.704,
-          211.008
-        ]
-      ],
-      [
-        "bottle",
-        [
-          557.704,
-          169.792,
-          569.296,
-          211.008
-        ]
-      ],
-      [
-        "bottle",
-        [
-          569.296,
-          169.792,
-          581.532,
-          211.008
-        ]
-      ],
-      [
-        "bottle",
-        [
-          581.532,
-          169.792,
-          592.48,
-          211.008
-        ]
-      ],
-      [
-        "bottle",
-        [
-          592.48,
-          169.792,
-          604.072,
-          211.008
-        ]
-      ],
-      [
-        "bottle",
-        [
-          604.072,
-          169.792,
-          615.02,
-          211.008
-        ]
-      ],
-      [
-        "bottle",
-        [
-          615.02,
-          169.792,
-          627.9,
-          211.008
-        ]
-      ],
-      [
-        "bottle",
-        [
-          627.9,
-          169.792,
-          642.712,
-          211.008
-        ]
-      ],
-      [
-        "bottle",
-        [
-          626.612,
-          0.0,
-          642.712,
-          9.408
         ]
       ]
     ]

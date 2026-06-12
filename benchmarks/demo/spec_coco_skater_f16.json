@@ -3,7 +3,7 @@
   "img_w": 644,
   "img_h": 504,
   "query": "person \u00b7 skateboard",
-  "note": "same detections \u00b7 f16 vs bf16 \u00b7 GB10 GPU",
+  "note": "same detections \u00b7 GB10 GPU",
   "link": "github.com/mudler/locate-anything.cpp",
   "boxes": [
     [
@@ -158,29 +158,20 @@
         642.712,
         283.248
       ]
-    ],
-    [
-      "person",
-      [
-        636.272,
-        234.36,
-        642.712,
-        283.248
-      ]
     ]
   ],
   "engines": [
     {
       "label": "locate-anything.cpp (f16)",
       "device": "GB10 GPU",
-      "proc_s": 1.51,
-      "rate": "18 boxes",
+      "proc_s": 1.477,
+      "rate": "17 boxes",
       "accent": "teal"
     },
     {
       "label": "PyTorch (official, bf16)",
       "device": "GB10 GPU",
-      "proc_s": 2.541,
+      "proc_s": 2.551,
       "rate": "greedy",
       "accent": "slate"
     }

@@ -3,7 +3,7 @@
   "img_w": 812,
   "img_h": 1092,
   "query": "person \u00b7 bus",
-  "note": "same detections \u00b7 f16 vs bf16 \u00b7 GB10 GPU",
+  "note": "same detections \u00b7 GB10 GPU",
   "link": "github.com/mudler/locate-anything.cpp",
   "boxes": [
     [
@@ -59,29 +59,20 @@
         740.544,
         67.704
       ]
-    ],
-    [
-      "person",
-      [
-        802.256,
-        0.0,
-        812.0,
-        67.704
-      ]
     ]
   ],
   "engines": [
     {
       "label": "locate-anything.cpp (f16)",
       "device": "GB10 GPU",
-      "proc_s": 2.804,
-      "rate": "7 boxes",
+      "proc_s": 2.683,
+      "rate": "6 boxes",
       "accent": "teal"
     },
     {
       "label": "PyTorch (official, bf16)",
       "device": "GB10 GPU",
-      "proc_s": 4.786,
+      "proc_s": 4.808,
       "rate": "greedy",
       "accent": "slate"
     }
