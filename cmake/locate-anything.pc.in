@@ -1,0 +1,10 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include/locate-anything
+
+Name: LocateAnything
+Description: Port of Nvidia LocateAnything-3B on ggml
+Version: @PROJECT_VERSION@
+Libs: -L${libdir} -llocate_anything
+Cflags: -I${includedir}
