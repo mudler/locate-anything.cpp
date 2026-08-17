@@ -30,6 +30,9 @@ set(GGML_CUDA   ${LA_GGML_CUDA}   CACHE BOOL "" FORCE)
 set(GGML_METAL  ${LA_GGML_METAL}  CACHE BOOL "" FORCE)
 set(GGML_VULKAN ${LA_GGML_VULKAN} CACHE BOOL "" FORCE)
 set(GGML_CANN   ${LA_GGML_CANN}   CACHE BOOL "" FORCE)
+
+include(GNUInstallDirs)
+
 add_subdirectory(third_party/ggml EXCLUDE_FROM_ALL)
 
 # ---------- liblocate_anything ----------
@@ -74,3 +77,56 @@ if(LA_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
 message(STATUS "locate-anything.cpp configured (lib + tests)")
+
+# --- Installation rules ---
+include(CMakePackageConfigHelpers)
+
+# Install library target and headers
+install(TARGETS locate_anything
+    EXPORT LocateAnythingTargets
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/locate-anything
+    FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.hh" PATTERN "*.inl"
+)
+
+# Export the targets for find_package
+install(EXPORT LocateAnythingTargets
+    FILE LocateAnythingTargets.cmake
+    NAMESPACE LocateAnything::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LocateAnything
+)
+
+# Create and install package config files
+configure_package_config_file(
+    ${CMAKE_CURRENT_LIST_DIR}/cmake/LocateAnythingConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/LocateAnythingConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LocateAnything
+)
+
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/LocateAnythingConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY AnyNewerVersion
+)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/LocateAnythingConfig.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/LocateAnythingConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LocateAnything
+)
+
+# pkg-config
+set(PKGCONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+configure_file(${CMAKE_CURRENT_LIST_DIR}/cmake/locate-anything.pc.in
+               ${CMAKE_CURRENT_BINARY_DIR}/locate-anything.pc @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/locate-anything.pc DESTINATION ${PKGCONFIG_INSTALL_DIR})
+
+# Install CLI if built
+if(TARGET locate-anything-cli)
+    install(TARGETS locate-anything-cli
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
+endif()
