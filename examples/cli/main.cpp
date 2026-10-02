@@ -18,7 +18,8 @@ static int cmd_detect(const la::cli::DetectArgs& a){
     auto mode = (a.mode=="slow")? la::Engine::Mode::Slow
               : (a.mode=="fast")? la::Engine::Mode::Fast
               : la::Engine::Mode::Hybrid;
-    auto boxes = eng->locate(a.input, a.prompt, mode);
+    auto boxes = eng->locate(a.input, a.prompt, mode,
+                             a.max_new > 0 ? a.max_new : la::Engine::kDefaultMaxNew);
     std::string json = boxes_json(boxes);
     if(!a.output.empty()){ std::ofstream o(a.output); o<<json; } else { std::printf("%s\n", json.c_str()); }
     if(!a.annotated.empty()){

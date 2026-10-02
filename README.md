@@ -123,7 +123,8 @@ quantized; the ViT, projector, norms, biases, and the two host-read f32 tensors
 
 ```sh
 locate-anything-cli detect --model <gguf> --input <image> --prompt <text> \
-    [--mode hybrid|slow|fast] [--annotated out.png] [--output boxes.json] [--threads N]
+    [--mode hybrid|slow|fast] [--annotated out.png] [--output boxes.json] [--threads N] \
+    [--max-new N]
 locate-anything-cli info     --model <gguf>
 locate-anything-cli quantize <in.gguf> <out.gguf> <q8_0|q6_k|q5_k|q4_k|f16>
 ```
@@ -131,6 +132,10 @@ locate-anything-cli quantize <in.gguf> <out.gguf> <q8_0|q6_k|q5_k|q4_k|f16>
 Decode modes mirror the upstream `generation_mode`: `hybrid` (Parallel Box Decoding with
 AR fallback, default), `slow` (pure auto-regressive), `fast` (MTP-only, no AR fallback).
 The prompt is open-vocabulary; separate multiple categories with `</c>`.
+
+`--max-new` caps the generated tokens (default 4096, as in the official demo). Each box is
+6 tokens, so the output is silently cut off after roughly `N/6` detections; raise it for
+crowded scenes.
 
 ## Library / C-API
 

@@ -14,3 +14,4 @@ __pycache__/
 /benchmarks/media/_tmp.json
 servers.json
 docker-compose.npu.yml
+*.DS_Store

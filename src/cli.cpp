@@ -41,6 +41,7 @@ void print_help() {
         "  locate-anything-cli detect   --model <gguf> --input <image> --prompt <text>\n"
         "                               [--output <json>] [--annotated <png>]\n"
         "                               [--mode hybrid|slow|fast] [--threads N]\n"
+        "                               [--max-new N]\n"
         "  locate-anything-cli info     --model <gguf>\n"
         "  locate-anything-cli quantize <input.gguf> <output.gguf> <type>\n"
         "  locate-anything-cli --help\n"
@@ -52,7 +53,9 @@ void print_help() {
         "  --output <json>     write detections JSON here (default: stdout)\n"
         "  --annotated <png>   write an annotated PNG with rendered boxes\n"
         "  --mode hybrid|slow|fast  decode mode (default: hybrid; fast=MTP-only)\n"
-        "  --threads N         CPU threads for ggml (0 = auto, default 0)\n");
+        "  --threads N         CPU threads for ggml (0 = auto, default 0)\n"
+        "  --max-new N         max tokens to generate (default 4096); each box is 6 tokens,\n"
+        "                      so output is cut off after ~N/6 detections\n");
 }
 
 Parsed parse(int argc, char** argv) {
@@ -76,6 +79,11 @@ Parsed parse(int argc, char** argv) {
             else if (a == "--threads") {
                 std::string v; if (!eat_value(argc, argv, i, "--threads", v, r.error)) return r;
                 if (!parse_int(v, r.detect.threads, r.error, "--threads")) return r;
+            }
+            else if (a == "--max-new") {
+                std::string v; if (!eat_value(argc, argv, i, "--max-new", v, r.error)) return r;
+                if (!parse_int(v, r.detect.max_new, r.error, "--max-new")) return r;
+                if (r.detect.max_new < 1) { r.error = "detect: --max-new must be >= 1 (got: " + v + ")"; return r; }
             }
             else { r.error = "unknown flag: " + a; return r; }
         }
