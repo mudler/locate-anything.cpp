@@ -3,9 +3,13 @@
 #include "vit_rope.hpp"
 #include "ggml_extend.hpp"
 #include <cstring>
+#include <algorithm>
 #include <cmath>
 
 namespace la {
+
+// Upper bound on one attention-score tensor (see build_block).
+static constexpr int64_t kMaxScoreBytes = 1LL << 30;
 
 // Per-layer weights for one MoonViT encoder block.
 struct VitLayerWeights {
@@ -45,11 +49,27 @@ static ggml_tensor* build_block(ggml_context* ctx, ggml_tensor* x,
     ggml_tensor* qp = ggml_cont(ctx, ggml_permute(ctx, q, 0,2,1,3));   // [D,tok,H]
     ggml_tensor* kp = ggml_cont(ctx, ggml_permute(ctx, k, 0,2,1,3));
     ggml_tensor* vp = ggml_cont(ctx, ggml_permute(ctx, v, 0,2,1,3));
-    ggml_tensor* scores = ggml_mul_mat(ctx, kp, qp);                  // [tok_k,tok_q,H]
-    ggml_mul_mat_set_prec(scores, GGML_PREC_F32);
-    scores = ggml_soft_max_ext(ctx, scores, nullptr, 1.0f/std::sqrt((float)D), 0.0f);
     ggml_tensor* vt = ggml_cont(ctx, ggml_permute(ctx, vp, 1,0,2,3)); // [tok,D,H]
-    ggml_tensor* o  = ggml_mul_mat(ctx, vt, scores);                  // [D,tok_q,H]
+    // The full score tensor is [tok_k,tok_q,H] f32, which for large images
+    // (up to ~25k tokens) is tens of GB: past what GPU backends can
+    // address in one buffer. Process the queries in chunks so each score tensor
+    // stays under kMaxScoreBytes. Rows of the softmax are independent, so this is
+    // numerically identical; small images take the single-chunk path unchanged.
+    const int64_t per_q  = (int64_t)tok * H * (int64_t)sizeof(float);
+    const int     chunk  = (int)std::max<int64_t>(1, std::min<int64_t>(tok, kMaxScoreBytes / per_q));
+    ggml_tensor* o = nullptr;                                         // [D,tok_q,H]
+    for (int q0 = 0; q0 < tok; q0 += chunk) {
+        const int n = std::min(chunk, tok - q0);
+        ggml_tensor* qc = qp;
+        if (n != tok)
+            qc = ggml_cont(ctx, ggml_view_3d(ctx, qp, D, n, H, qp->nb[1], qp->nb[2],
+                                             (size_t)q0 * qp->nb[1]));   // [D,n,H]
+        ggml_tensor* scores = ggml_mul_mat(ctx, kp, qc);              // [tok_k,n,H]
+        ggml_mul_mat_set_prec(scores, GGML_PREC_F32);
+        scores = ggml_soft_max_ext(ctx, scores, nullptr, 1.0f/std::sqrt((float)D), 0.0f);
+        ggml_tensor* oc = ggml_mul_mat(ctx, vt, scores);              // [D,n,H]
+        o = o ? ggml_concat(ctx, o, oc, 1) : oc;
+    }
     o = ggml_cont(ctx, ggml_permute(ctx, o, 0,2,1,3));                // [D,H,tok]
     o = ggml_reshape_2d(ctx, o, D*H, tok);                            // [1152,tok]
     o = la::linear(ctx, w.wo_w, o, w.wo_b);
