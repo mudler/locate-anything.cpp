@@ -63,8 +63,15 @@ Clone with submodules (ggml is vendored at `third_party/ggml`):
 ```sh
 git clone --recursive https://github.com/mudler/locate-anything.cpp
 cd locate-anything.cpp
-cmake -B build -DLA_BUILD_TESTS=ON -DLA_BUILD_CLI=ON && cmake --build build -j
+cmake -B build -DLA_BUILD_TESTS=ON -DLA_BUILD_CLI=ON
+cmake --build build -j 4     # explicit job count — see note below
 ```
+
+> **Build parallelism:** Use an explicit job count, such as
+> `cmake --build build -j 4`. Without a count, `-j` uses the native build tool's
+> default parallelism. Concurrent C++/CUDA compilation can exhaust available
+> memory. Reduce the count to `-j 2` or `-j 1` if memory is limited. On Unix,
+> `nice -n 19` lowers CPU scheduling priority, but does not limit memory use.
 
 ### CMake options
 
